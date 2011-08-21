@@ -1,13 +1,18 @@
 package game;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+
+import java.util.Collection;
 import java.util.List;
 
+import static com.google.common.base.Predicates.notNull;
 import static com.google.common.collect.Lists.newArrayList;
 
 public class Board {
 
-    private int rows;
-    private int columns;
+    private final int rows;
+    private final int columns;
     private List<Cell> cells;
 
     public Board(int rows, int columns) {
@@ -32,7 +37,7 @@ public class Board {
     }
 
     public Cell getCell(int row, int column) {
-        if (row < 0 || column < 0 || column > columns || row > rows) return null;
+        if (row < 0 || column < 0 || column >= columns || row >= rows) return null;
         int index = row * columns + column;
         return cells.get(index);
     }
@@ -51,7 +56,44 @@ public class Board {
         result.add(getCell(nextRow, previousColumn));
         result.add(getCell(nextRow, column));
         result.add(getCell(nextRow, nextColumn));
+        return newArrayList(Collections2.filter(result, notNull()));
+    }
+
+    public void nextGeneration() {
+        Board snapshot = takeBoardSnapshot();
+        for (int row = 0; row < rows; row++) {
+            for (int column = 0; column < columns; column++) {
+                updateCell(row, column, snapshot);
+            }
+        }
+    }
+
+    private Board takeBoardSnapshot() {
+        Board result = new Board(getRows(), getColumns());
+        for (Cell cell : cells) {
+            int currentCellIndex = getCells().indexOf(cell);
+            result.getCells().get(currentCellIndex).setAlive(cell.isAlive());
+        }
         return result;
+    }
+
+    private void updateCell(int row, int column, Board snapshot) {
+        Cell cell = getCell(row, column);
+        List<Cell> neighbours = snapshot.getNeighbours(row, column);
+        Collection<Cell> aliveNeighbours = Collections2.filter(neighbours, aliveCell());
+        if (aliveNeighbours.size() < 2 || aliveNeighbours.size() > 3) {
+            cell.setAlive(false);
+        } else if (aliveNeighbours.size() == 3 && !cell.isAlive()) {
+            cell.setAlive(true);
+        }
+    }
+
+    private Predicate<Cell> aliveCell() {
+        return new Predicate<Cell>() {
+            public boolean apply(Cell cell) {
+                return cell.isAlive();
+            }
+        };
     }
 
 }

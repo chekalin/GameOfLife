@@ -1,13 +1,15 @@
 package ui;
 
+import game.Cell;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class CellPanel extends JPanel {
-    private boolean alive;
+    private Cell cell;
 
-    public CellPanel(boolean alive) {
-        this.alive = alive;
+    public CellPanel(Cell cell) {
+        this.cell = cell;
     }
 
     @Override
@@ -16,7 +18,7 @@ public class CellPanel extends JPanel {
         g.setColor(Color.BLACK);
         int height = getSize().height;
         int width = getSize().width;
-        if (alive) {
+        if (cell.isAlive()) {
             g.fillRect(0, 0, width, height);
         } else {
             g.drawRect(0, 0, width, height);
