@@ -1,4 +1,6 @@
-package com.example.game;
+package ui;
+
+import game.Board;
 
 import javax.swing.*;
 
